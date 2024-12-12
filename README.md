@@ -3,7 +3,7 @@ This repository contains five files for the STOR 390 Final Project submission.
 
 • Novel Analysis (RMD and PDF):Contains R code and markdown output used for the novel analysis section of the project. This includes attempts to replicate key methodologies discussed in the project, such as implementing fairness metrics and evaluating their trade-offs.
 
-• Final Paper (RMD and PDF): Includes the complete final paper text, references, and supporting arguments. The paper critiques the statistical measures of fairness, explores ethical frameworks like consequentialism, deontology, and virtue ethics, and applies these to real-world case studies like the COMPAS algorithm.
+• Final Paper (RMD and PDF): Includes the complete final paper text, references, and supporting arguments. The paper critiques the statistical measures of fairness, explores ethical frameworks including consequentialism and deontology, and applies these to real-world case studies like the COMPAS algorithm.
 
 • COMPAS Dataset (CSV): A publicly available dataset containing recidivism predictions, used for reproducing and analyzing bias and fairness in predictive algorithms. This dataset was used in the novel analysis portion of the project.
 
