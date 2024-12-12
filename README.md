@@ -9,4 +9,4 @@ This repository contains five files for the STOR 390 Final Project submission.
 
 In their paper, *Another Look at the (Im-)Precision of Individual Risk Estimates Made Using ActuarialRisk Assessment Instruments*, Hart and Cooke critically evaluate the precision and ethical implications of actuarial risk assessment instruments (ARAIs) used in criminal justice systems. This project extends their discussion by examining algorithmic fairness through various ethical frameworks, highlighting the challenges of balancing accuracy, fairness, and justice in statistical models.
 
-Through the lens of utilitarianism and deontology, this paper argues that while ARAIs may offer practical eﬀiciency at the group level, their application to individual decision-making raises profound moralconcerns that challenge their legitimacy
+Through the lens of utilitarianism and deontology, this paper argues that while ARAIs may offer practical eﬀiciency at the group level, their application to individual decision-making raises profound moral concerns that challenge their legitimacy
