@@ -1,12 +1,12 @@
 # STOR 390 Final Project: Evaluating Actuarial Risk Assessment Instruments and Their Ethical Implications
 This repository contains five files for the STOR 390 Final Project submission.
 
-• Novel Analysis (RMD and PDF):Contains R code and markdown output used for the novel analysis section of the project. This includes attempts to replicate key methodologies discussed in the project, such as implementing fairness metrics and evaluating their trade-offs.
+• Novel Analysis (RMD and PDF): Contains the R code used to conduct the novel analysis of the COMPAS dataset. This file replicates Hart and Cooke's methodology using logistic regression and extends it with new approaches, such as interaction modeling and prediction interval analysis.
 
-• Final Paper (RMD and PDF): Includes the complete final paper text, references, and supporting arguments. The paper critiques the statistical measures of fairness, explores ethical frameworks including consequentialism and deontology, and applies these to real-world case studies like the COMPAS algorithm.
+• Final Paper (RMD and PDF): Includes the complete final paper text, references, and supporting arguments.
 
 • COMPAS Dataset (CSV): A publicly available dataset containing recidivism predictions, used for reproducing and analyzing bias and fairness in predictive algorithms. This dataset was used in the novel analysis portion of the project.
 
-In their paper, *Another Look at the (Im-)Precision of Individual Risk Estimates Made Using ActuarialRisk Assessment Instruments*, Hart and Cooke critically evaluate the precision and ethical implications of actuarial risk assessment instruments (ARAIs) used in criminal justice systems. This project extends their discussion by examining algorithmic fairness through various ethical frameworks, highlighting the challenges of balancing accuracy, fairness, and justice in statistical models.
+In their paper *Another Look at the (Im-)Precision of Individual Risk Estimates Made Using Actuarial Risk Assessment Instruments*, Hart and Cooke critique the reliability of ARAIs. This project builds on their work by applying their methods to the larger COMPAS dataset. Through the lens of utilitarian and deontological ethics, the paper argues that while ARAIs may offer efficiency at the group level, their use in individual decision-making raises profound ethical concerns.
 
-Through the lens of utilitarianism and deontology, this paper argues that while ARAIs may offer practical eﬀiciency at the group level, their application to individual decision-making raises profound moral concerns that challenge their legitimacy
+This repository is a resource for exploring the limitations, ethical implications, and potential improvements for ARAIs in high-stakes domains.
