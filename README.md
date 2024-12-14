@@ -1,4 +1,4 @@
-# STOR 390 Final Project: Evaluating Actuarial Risk Assessment Instruments and TheirEthical Implications
+# STOR 390 Final Project: Evaluating Actuarial Risk Assessment Instruments and Their Ethical Implications
 This repository contains five files for the STOR 390 Final Project submission.
 
 • Novel Analysis (RMD and PDF):Contains R code and markdown output used for the novel analysis section of the project. This includes attempts to replicate key methodologies discussed in the project, such as implementing fairness metrics and evaluating their trade-offs.
