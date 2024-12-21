@@ -1,0 +1,229 @@
+---
+title: "COMPAS Dataset Novel Analysis"
+author: "Dylan Doby"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(car)
+library(caret)
+library(pROC)
+library(MASS)
+```
+
+## Load and Explore the Data
+
+```{r}
+# Load the COMPAS dataset
+compas_data <- read.csv("~/Downloads/compas-scores-two-years.csv")
+
+# Inspect the dataset
+str(compas_data)
+summary(compas_data)
+
+# Filter for relevant variables
+compas_filtered <- compas_data %>% 
+  dplyr::select(
+    age, 
+    sex, 
+    race, 
+    priors_count, 
+    decile_score, 
+    is_recid
+  ) %>% 
+  mutate(is_recid = as.factor(is_recid))
+
+# Check for missing data
+sum(is.na(compas_filtered))
+
+# Drop rows with missing data
+compas_filtered <- na.omit(compas_filtered)
+
+```
+
+## Logistic Regression: Simple Model
+
+```{r}
+# Fit a logistic regression model to predict recidivism
+simple_mod <- glm(is_recid ~ age + sex + race + priors_count + decile_score, 
+                  data = compas_filtered, 
+                  family = binomial)
+
+# Summary of the model
+summary(simple_mod)
+
+# Check for multicollinearity
+vif(simple_mod)
+
+```
+
+## Adjusted Model with Interaction Terms
+
+```{r}
+# Fit a model with interaction terms
+interaction_mod <- glm(is_recid ~ (age + sex + race + priors_count + decile_score)^2, 
+                       data = compas_filtered, 
+                       family = binomial)
+
+# Summary of the model
+summary(interaction_mod)
+
+# Compare models using AIC
+AIC(simple_mod, interaction_mod)
+
+```
+
+## Hierarchical Model Selection Process
+
+```{r}
+hierarchical_backward_elimination <- function(model, data) {
+  terms <- attr(model$terms, "term.labels")  # Extract initial terms
+  best_aic <- AIC(model)  # Track the best AIC
+  best_model <- model  # Store the best model
+
+  while (length(terms) > 1) {
+    # Test removing each term
+    candidate_models <- lapply(terms, function(term) {
+      reduced_terms <- terms[!terms %in% term]
+
+      # Skip if removal violates the hierarchical principle
+      if (any(grepl(paste0(term, ":"), paste(reduced_terms, collapse = " + ")))) {
+        return(NULL)
+      }
+
+      # Fit reduced model
+      reduced_model <- glm(as.formula(paste("is_recid ~", paste(reduced_terms, collapse = " + "))),
+                           data = data,
+                           family = binomial)
+      list(term = term, model = reduced_model, aic = AIC(reduced_model))
+    })
+
+    # Filter valid models
+    candidate_models <- Filter(Negate(is.null), candidate_models)
+    if (length(candidate_models) == 0) break
+
+    # Find the model with the lowest AIC
+    best_candidate <- candidate_models[[which.min(sapply(candidate_models, function(x) x$aic))]]
+
+    # Only update if AIC improves
+    if (best_candidate$aic < best_aic) {
+      cat("Removing term:", best_candidate$term, "with AIC:", best_candidate$aic, "\n")
+      best_aic <- best_candidate$aic
+      best_model <- best_candidate$model
+      terms <- attr(best_model$terms, "term.labels")  # Update terms
+    } else {
+      break
+    }
+  }
+
+  return(best_model)
+}
+
+# Apply the hierarchical backward elimination process
+final_model <- hierarchical_backward_elimination(interaction_mod, compas_filtered)
+summary(final_model)
+
+```
+
+## Evaluating Simple Model Performance
+
+```{r}
+# Split data into training and testing sets
+set.seed(999)
+trainIndex <- createDataPartition(compas_filtered$is_recid, p = 0.8, list = FALSE)
+train_data <- compas_filtered[trainIndex, ]
+test_data <- compas_filtered[-trainIndex, ]
+
+# Fit the simple model on training data
+simple_mod <- glm(is_recid ~ age + sex + race + priors_count + decile_score, 
+                  data = train_data, 
+                  family = binomial)
+
+# Predict probabilities on test data
+simple_pred_probs <- predict(simple_mod, newdata = test_data, type = "response")
+
+# Apply a threshold to classify probabilities into binary outcomes
+simple_pred_classes <- ifelse(simple_pred_probs > 0.5, 1, 0)
+
+# Confusion Matrix
+confusionMatrix(as.factor(simple_pred_classes), test_data$is_recid)
+
+```
+
+## ROC Analysis and AUC - Simple Model
+
+```{r}
+# Compute ROC curve and AUC
+roc_obj <- roc(test_data$is_recid, simple_pred_probs)
+plot(roc_obj, main = "ROC Curve for Logistic Regression")
+auc(roc_obj)
+
+```
+
+## Evaluating Final Model Performance
+
+```{r}
+# Split data into training and testing sets
+set.seed(999)
+trainIndex <- createDataPartition(compas_filtered$is_recid, p = 0.8, list = FALSE)
+train_data <- compas_filtered[trainIndex, ]
+test_data <- compas_filtered[-trainIndex, ]
+
+# Fit the final model on training data
+final_mod <- glm(as.formula(paste("is_recid ~", paste(attr(final_model$terms, "term.labels"), collapse = "+"))), 
+                 data = train_data, 
+                 family = binomial)
+
+# Predict probabilities on test data
+pred_probs <- predict(final_mod, newdata = test_data, type = "response")
+
+# Apply a threshold to classify probabilities into binary outcomes
+pred_classes <- ifelse(pred_probs > 0.5, 1, 0)
+
+# Confusion Matrix
+confusionMatrix(as.factor(pred_classes), test_data$is_recid)
+
+```
+
+## ROC Analysis and AUC - Final Model
+
+```{r}
+# Compute ROC curve and AUC
+roc_obj <- roc(test_data$is_recid, pred_probs)
+plot(roc_obj, main = "ROC Curve for Logistic Regression")
+auc(roc_obj)
+
+```
+
+## Group-Level and Individual-Level Analysis
+
+```{r}
+# Confidence intervals for group-level predictions
+group_summary <- train_data %>% 
+  group_by(is_recid) %>% 
+  summarise(mean_decile_score = mean(decile_score), 
+            ci_lower = mean_decile_score - 1.96 * sd(decile_score) / sqrt(n()), 
+            ci_upper = mean_decile_score + 1.96 * sd(decile_score) / sqrt(n()))
+
+group_summary
+
+# Prediction intervals for individual predictions
+prediction_intervals <- test_data %>% 
+  mutate(predicted_prob = pred_probs, 
+         lower_bound = predicted_prob - 1.96 * sqrt(predicted_prob * (1 - predicted_prob)), 
+         upper_bound = predicted_prob + 1.96 * sqrt(predicted_prob * (1 - predicted_prob)))
+
+head(prediction_intervals, n=10)
+```
+
+
+
+
+
